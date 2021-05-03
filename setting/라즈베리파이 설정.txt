@@ -1,0 +1,115 @@
+라즈베리파이 셋팅
+
+- 문서작성일 기준 라즈비안 (buster / stretch) 가능 확인
+
+0. 7인치 디스플레이 드라이버 설치
+pdf참조
+
+vncserver -geometry 1920x1080
+
+$ sudo apt update
+$ sudo apt upgrade
+$ sudo apt install build-essential
+$ sudo apt install cmake
+$ sudo apt install qtcreator
+$ sudo apt install qt5-default
+
+Tools-> Options-> Environment -> General -> Terminal
+/usr/bin/x-terminal-emulator -e sudo
+
+한글깨짐
+#sudo apt-get -y install ibus-hangul
+#sudo apt-get -y install ttf-unfonts-core
+sudo apt-get install fonts-unfonts-core
+
+1. 해상도 800x480설정
+$sudo nano /boot/config.txt
+max_usb_current=1
+hdmi_group=2
+hdmi_mode=87
+hdmi_cvt=800 480 60 6 0 0 0
+hdmi_drive=1
+
+
+2. 마우스 커서 제거
+$sudo nano /etc/lightdm/lightdm.conf
+ctrl+w xserver-command=X
+xserver-command=X -nocursor
+
+3. 화면보호기 제거
+$sudo nano /etc/lightdm/lightdm.conf
+xserver-command=X -s 0 -dpms
+
+$sudo nano /etc/X11/xinit/xinitrc
+xset s off         # don't activate screensaver
+xset -dpms         # disable DPMS (Energy Star) features.
+xset s noblank     # don't blank the video device
+
+
+4. 부팅화면 제거
+
+무지개 이미지 제거
+$sudo nano /boot/config.txt
+disable_splash=1
+
+
+5. 부팅로그 제거
+$sudo nano /boot/cmdline.txt
+
+1. replace “console=tty1” with “console=tty3”
+2. splash quiet plymouth.ignore-serial-consoles logo.nologo vt.global_cursor_default=0
+
+‘splash’ : enables splash image
+‘quiet’ : disable boot message texts
+‘plymouth.ignore-serial-consoles’ : not sure about this but seems it’s required when use Plymouth.
+‘logo.nologo’ : removes Raspberry Pi logo in top left corner.
+‘vt.global_cursor_default=0’ : removes blinking cursor.
+
+6-0 이미지 및 설치파일 메일로 다운로드
+다운하면, home/pi/Downloads 안에 파일이 있음
+이미지명은 splash / 확장자는 .png
+설치파일명은 자유/ 확장자는 .zip  
+
+---- 여기서부터 진행
+
+6. 스플래시 이미지 교체
+$sudo mv /usr/share/plymouth/themes/pix/splash.png /usr/share/plymouth/themes/pix/splash_origin.png
+$sudo cp /home/pi/Downloads/splash.png /usr/share/plymouth/themes/pix
+
+7. 스플래시 이미지 텍스트 제거
+$sudo nano /usr/share/plymouth/themes/pix/pix.script
+아래 네줄 제거 또는 주석처리
+message_sprite = Sprite();
+message_sprite.SetPosition(screen_width * 0.1, screen_height * 0.9, 10000);
+my_image = Image.Text(text, 1, 1, 1);
+message_sprite.SetImage(my_image);
+
+8-0. 프로그램 압축 해제
+$sudo unzip /home/pi/Downloads/freecon.zip -d /home/pi/freecon/
+알 수 없는 명령어 에러라면, 
+$sudo apt-get install zip unzip
+$sudo find /home/pi/freecon -exec chmod 755 {} \;
+$sudo ls -l /home/pi/freecon (권한 확인 , -rwxr-xr-x 맞는지?)
+
+8. 시작프로그램 등록 (실행파일 등록 경로)
+ref : https://m.blog.naver.com/PostView.nhn?blogId=phj790122&logNo=221095756285&proxyReferer=https:%2F%2Fwww.google.com%2F
+
+$sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
+@sudo /home/pi/freecon/freecon
+
+sudo nano ~/.config/lxsession/LXDE/autostart
+
+// 웹 버전?
+ref : https://atherbug.tistory.com/3
+
+9. 단축바 사라지게
+$sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
+#@lxpanel --profile LXDE-pi
+
+10. 배경화면 검게
+-
+11. 배경 아이콘 삭제
+
+기타. 번개 표시??
+저전압상태, 어댑터를 바꿔라
+ref : http://blog.naver.com/PostView.nhn?blogId=linuxni&logNo=221547699515&parentCategoryNo=&categoryNo=&viewDate=&isShowPopularPosts=false&from=postView
